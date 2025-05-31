@@ -3,6 +3,8 @@ import mysql.connector
 
 app = Flask(__name__)
 
+print("Starting the billing system application...")
+
 @app.route('/')
 def index():
     return render_template('bill_form.html')
