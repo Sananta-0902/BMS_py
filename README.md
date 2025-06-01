@@ -28,6 +28,9 @@ The Billing System is a web application designed to streamline the process of ma
    - Update the database connection details (`username`,`password`) in `db.py`.
 
 4. Run the `admin_setup.py` to create an admin
+   ```bash
+   python admin_setup.py
+   ```
 
 5. Run the application:
    ```bash
