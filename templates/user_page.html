@@ -1,0 +1,12 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ session['user'] }}</h2>
+    <p>This is the user dashboard.</p>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>

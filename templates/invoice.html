@@ -1,0 +1,31 @@
+<!-- templates/invoice.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice #{{ invoice.id }}</title>
+</head>
+<body>
+    <h2>Invoice #{{ invoice.id }}</h2>
+    <p>Date: {{ invoice.date }}</p>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.quantity * item.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="{{ url_for('download_invoice', invoice_id=invoice.id) }}">Download PDF</a>
+    <br><br>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>
