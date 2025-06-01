@@ -7,8 +7,8 @@ app.secret_key = "super-secret-key"  # Change this to a secure key in production
 
 @app.route('/')
 def home():
-    if 'user' in session:
-        return render_template('home.html', username=session['user'])
+    # if 'user' in session:
+    #     return render_template('home.html', username=session['user'])
     return redirect(url_for('login'))
 
 @app.route('/admin_page', methods=['GET'])
