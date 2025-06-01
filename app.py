@@ -11,10 +11,25 @@ def home():
         return render_template('home.html', username=session['user'])
     return redirect(url_for('login'))
 
-@app.route('/admin/products', methods=['GET', 'POST'])
+@app.route('/admin_page', methods=['GET'])
+def admin_page():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role != 'admin':
+        return "Unauthorized", 403
+
+    return render_template('admin.html')
+
+@app.route('/manage_products', methods=['GET', 'POST'])
 def manage_products():
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role != 'admin':
+        return "Unauthorized", 403
 
     if request.method == 'POST':
         action = request.form['action']
@@ -37,8 +52,43 @@ def manage_products():
         return redirect(url_for('manage_products'))
 
     products = get_all_products()
-    return render_template('products.html', products=products)
+    return render_template('manage_products.html', products=products)
 
+@app.route('/manage_staff', methods=['GET', 'POST'])
+def manage_staff():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role != 'admin':
+        return "Unauthorized", 403
+
+    if request.method == 'POST':
+        action = request.form['action']
+
+        if action == 'add_staff':
+            username = request.form['username']
+            password = request.form['password']
+            add_staff(username, password)
+
+        elif action == 'update_staff':
+            staff_id = request.form['id']
+            username = request.form['username']
+            update_staff(staff_id, username)
+
+        elif action == 'delete_staff':
+            staff_id = request.form['id']
+            delete_staff(staff_id)
+
+        elif action == 'reset_password':
+            staff_id = request.form['staff_id']
+            new_password = request.form['new_password']
+            reset_staff_password(staff_id, new_password)
+
+        return redirect(url_for('manage_staff'))
+
+    staffs = get_all_staffs()
+    return render_template('manage_staff.html', staffs=staffs)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -46,18 +96,14 @@ def login():
         user = validate_user(request.form['username'], request.form['password'])
         if user:
             session['user'] = user['username']
-            return redirect(url_for('home'))
+            user_role = get_user_role(user['username'])
+            if user_role == 'admin':
+                return redirect(url_for('manage_products'))
+            elif user_role == 'staff':
+                return redirect(url_for('create_invoice'))
         else:
             flash("Invalid username or password")
     return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        register_user(request.form['username'], request.form['password'])
-        flash("Registered successfully! Please login.")
-        return redirect(url_for('login'))
-    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
@@ -68,6 +114,10 @@ def logout():
 def create_invoice():
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role != 'staff':
+        return "Unauthorized", 403
 
     if request.method == 'POST':
         # Get customer details from form
@@ -96,8 +146,6 @@ def create_invoice():
     # GET request: show create invoice form
     products = get_all_products()
     return render_template('create_invoice.html', products=products)
-
-
 
 @app.route('/invoice/<int:invoice_id>')
 def view_invoice(invoice_id):

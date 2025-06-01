@@ -38,3 +38,6 @@ CREATE TABLE users (
 
 ALTER TABLE customers ADD CONSTRAINT unique_customer UNIQUE (name, phone);
 ALTER TABLE customers DROP INDEX unique_customer;
+
+ALTER TABLE users
+ADD COLUMN role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff';

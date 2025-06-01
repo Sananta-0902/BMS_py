@@ -31,6 +31,14 @@ def validate_user(username, password):
         return user
     return None
 
+def get_user_role(username):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
+    result = cursor.fetchone()
+    db.close()
+    return result[0] if result else None
+
 # ===================== CUSTOMER FUNCTIONS =====================
 
 def get_customers():
@@ -80,6 +88,44 @@ def get_all_products():
     products = cursor.fetchall()
     db.close()
     return products
+
+def add_staff(username, password):
+    db = get_db_connection()
+    cursor = db.cursor()
+    hashed = generate_password_hash(password)
+    cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)", (username, hashed, 'staff'))
+    db.commit()
+    db.close()
+
+def delete_staff(staff_id):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM users WHERE id = %s AND role = %s", (staff_id, 'staff'))
+    db.commit()
+    db.close()
+
+def update_staff(staff_id, username):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("UPDATE users SET username = %s WHERE id = %s AND role = %s", (username, staff_id, 'staff'))
+    db.commit()
+    db.close()
+
+def reset_staff_password(staff_id, new_password):
+    db = get_db_connection()
+    cursor = db.cursor()
+    hashed = generate_password_hash(new_password)
+    cursor.execute("UPDATE users SET password = %s WHERE id = %s AND role = %s", (hashed, staff_id, 'staff'))
+    db.commit()
+    db.close()
+
+def get_all_staffs():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT id, username, password FROM users WHERE role = %s", ('staff',))
+    staffs = cursor.fetchall()
+    db.close()
+    return staffs
 
 def get_products():
     return get_all_products()
@@ -188,4 +234,3 @@ def get_invoice_details(invoice_id):
     invoice['items'] = items
     invoice['total_amount'] = sum(item['total_price'] for item in items)
     return invoice
-
