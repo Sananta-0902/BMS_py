@@ -11,6 +11,35 @@ def home():
         return render_template('home.html', username=session['user'])
     return redirect(url_for('login'))
 
+@app.route('/admin/products', methods=['GET', 'POST'])
+def manage_products():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        action = request.form['action']
+
+        if action == 'add':
+            name = request.form['name']
+            price = float(request.form['price'])
+            add_product(name, price)
+
+        elif action == 'update':
+            product_id = request.form['id']
+            name = request.form['name']
+            price = float(request.form['price'])
+            update_product(product_id, name, price)
+
+        elif action == 'delete':
+            product_id = request.form['id']
+            delete_product(product_id)
+
+        return redirect(url_for('manage_products'))
+
+    products = get_all_products()
+    return render_template('products.html', products=products)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -35,21 +64,40 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
-@app.route('/create-invoice', methods=['GET', 'POST'])
+@app.route('/create_invoice', methods=['GET', 'POST'])
 def create_invoice():
     if 'user' not in session:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        customer_id = request.form['customer_id']
+        # Get customer details from form
+        customer_name = request.form['customer_name']
+        customer_phone = request.form['customer_phone']
+
+        # Save customer, get customer_id
+        customer_id = add_customer(customer_name, customer_phone)
+
+        # Create invoice for customer, get invoice_id
+        invoice_id = insert_invoice(customer_id)
+
+        # Add invoice items
         product_ids = request.form.getlist('product_id')
         quantities = request.form.getlist('quantity')
-        invoice_id = insert_invoice(customer_id, product_ids, quantities)
-        return redirect(url_for('view_invoice', invoice_id=invoice_id))
 
-    customers = get_customers()
-    products = get_products()
-    return render_template('create_invoice.html', customers=customers, products=products)
+        for pid, qty in zip(product_ids, quantities):
+            add_invoice_item(invoice_id, int(pid), int(qty))
+
+        # Fetch full invoice details to display
+        invoice_data =  get_invoice_details(invoice_id)
+
+        # Render invoice display page
+        return render_template('invoice_display.html', invoice=invoice_data)
+
+    # GET request: show create invoice form
+    products = get_all_products()
+    return render_template('create_invoice.html', products=products)
+
+
 
 @app.route('/invoice/<int:invoice_id>')
 def view_invoice(invoice_id):

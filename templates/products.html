@@ -1,0 +1,36 @@
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<h2>Manage Products</h2>
+
+<!-- Add Product -->
+<h3>Add New Product</h3>
+<form method="POST">
+    <input type="hidden" name="action" value="add">
+    <input type="text" name="name" placeholder="Product Name" required>
+    <input type="number" name="price" placeholder="Price" step="0.01" required>
+    <button type="submit">Add</button>
+</form>
+
+<!-- Existing Products -->
+<h3>Product List</h3>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Name</th><th>Price</th><th>Actions</th>
+    </tr>
+    {% for product in products %}
+    <tr>
+        <form method="POST">
+            <td><input type="hidden" name="id" value="{{ product.id }}">{{ product.id }}</td>
+            <td><input type="text" name="name" value="{{ product.name }}"></td>
+            <td><input type="number" name="price" value="{{ product.price }}" step="0.01"></td>
+            <td>
+                <button type="submit" name="action" value="update">Update</button>
+                <button type="submit" name="action" value="delete" onclick="return confirm('Delete this product?')">Delete</button>
+            </td>
+        </form>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="{{ url_for('home') }}">Back to Home</a>
