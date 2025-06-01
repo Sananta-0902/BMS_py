@@ -27,12 +27,14 @@ The Billing System is a web application designed to streamline the process of ma
    - Import the SQL schema from `Schema.sql` into your MySQL database.
    - Update the database connection details (`username`,`password`) in `db.py`.
 
-4. Run the application:
+4. Run the `admin_setup.py` to create an admin
+
+5. Run the application:
    ```bash
    python app.py
    ```
 
-5. Access the application:
+6. Access the application:
    - Open your browser and navigate to `http://127.0.0.1:5000`.
 
 ## Database Schema
