@@ -49,5 +49,3 @@ The database schema is defined in the `billing_system.sql` file. It includes tab
 - **Database**: MySQL
 - **Authentication**: Werkzeug for password hashing
 
-## License
-This project is licensed under the MIT License.
