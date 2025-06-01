@@ -24,7 +24,7 @@ The Billing System is a web application designed to streamline the process of ma
    ```
 
 3. Set up the database:
-   - Import the SQL schema from `billing_system.sql` into your MySQL database.
+   - Import the SQL schema from `Schema.sql` into your MySQL database.
    - Update the database connection details in `db.py`.
 
 4. Run the application:
