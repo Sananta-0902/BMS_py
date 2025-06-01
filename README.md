@@ -14,7 +14,7 @@ The Billing System is a web application designed to streamline the process of ma
 ## Setup Instructions
 1. Clone the repository:
    ```bash
-   git clone [<repository-url>](https://github.com/Sananta-0902/BMS_py.git)
+   git clone https://github.com/Sananta-0902/BMS_py.git
    cd BMS_py
    ```
 
