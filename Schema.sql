@@ -44,3 +44,15 @@ CREATE TABLE invoice_items (
     FOREIGN KEY (invoice_id) REFERENCES invoices(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+
+-- create a new user and grant privileges
+
+-- Step 1: Create a new user (change username and password as needed)
+CREATE USER 'billing_user'@'localhost' IDENTIFIED BY 'password';
+
+-- Step 2: Grant all privileges on the billing_db to the new user
+GRANT ALL PRIVILEGES ON billing_db.* TO 'billing_user'@'localhost';
+
+-- Step 3: Apply changes immediately
+FLUSH PRIVILEGES;

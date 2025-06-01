@@ -6,8 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
-        user="root",
-        password="edwinpaul1811",
+        user="billing_user",
+        password="password",
         database="billing_db"
     )
 
