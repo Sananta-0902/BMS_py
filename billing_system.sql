@@ -35,3 +35,6 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
+
+ALTER TABLE customers ADD CONSTRAINT unique_customer UNIQUE (name, phone);
+ALTER TABLE customers DROP INDEX unique_customer;
