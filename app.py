@@ -1,134 +1,65 @@
-from flask import Flask, request, render_template, jsonify
-import mysql.connector
-from mysql.connector import Error
+from flask import Flask, render_template, request, redirect, url_for, session
+from db import *
+from flask import flash
 
 app = Flask(__name__)
-
-print("Starting the billing system application...")
+app.secret_key = "super-secret-key"  # Change this to a secure key in production
 
 @app.route('/')
-def index():
-    return render_template('bill_form.html')
+def home():
+    if 'user' in session:
+        return render_template('home.html', username=session['user'])
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':
-        return render_template('login.html')
-    connection = None
-    cursor = None
-    try:
-        username = request.form['username']
-        password = request.form['password']
-
-        connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='password',
-            database='billing_system'
-        )
-        cursor = connection.cursor()
-
-        cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
-        user = cursor.fetchone()
+    if request.method == 'POST':
+        user = validate_user(request.form['username'], request.form['password'])
         if user:
-            return jsonify({"message": "Login successful"}), 200
+            session['user'] = user['username']
+            return redirect(url_for('home'))
         else:
-            return jsonify({"error": "Invalid credentials"}), 401
-
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+            flash("Invalid username or password")
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    connection = None
-    cursor = None
-    try:
-        username = request.form['username']
-        password = request.form['password']
+    if request.method == 'POST':
+        register_user(request.form['username'], request.form['password'])
+        flash("Registered successfully! Please login.")
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
-        connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='password',
-            database='billing_system'
-        )
-        cursor = connection.cursor()
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        if cursor.fetchone():
-            return jsonify({"error": "Username already exists"}), 400
+@app.route('/create-invoice', methods=['GET', 'POST'])
+def create_invoice():
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
-        connection.commit()
-        return jsonify({"message": "Registration successful"}), 201
+    if request.method == 'POST':
+        customer_id = request.form['customer_id']
+        product_ids = request.form.getlist('product_id')
+        quantities = request.form.getlist('quantity')
+        invoice_id = insert_invoice(customer_id, product_ids, quantities)
+        return redirect(url_for('view_invoice', invoice_id=invoice_id))
 
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
+    customers = get_customers()
+    products = get_products()
+    return render_template('create_invoice.html', customers=customers, products=products)
 
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+@app.route('/invoice/<int:invoice_id>')
+def view_invoice(invoice_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
-@app.route('/generate_bill', methods=['POST'])
-def generate_bill():
-    connection = None
-    cursor = None
-    try:
-        customer_name = request.form['customerName']
-        product_id = int(request.form['productId'])
-        quantity = int(request.form['quantity'])
-
-        connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='password',
-            database='billing_system'
-        )
-        cursor = connection.cursor()
-
-        # Check if customer exists
-        cursor.execute("SELECT customer_id FROM customers WHERE name = %s", (customer_name,))
-        customer = cursor.fetchone()
-        if customer:
-            customer_id = customer[0]
-        else:
-            cursor.execute("INSERT INTO customers (name) VALUES (%s)", (customer_name,))
-            customer_id = cursor.lastrowid
-
-        cursor.execute("SELECT price FROM products WHERE product_id = %s", (product_id,))
-        price_result = cursor.fetchone()
-        if price_result is None:
-            return jsonify({"error": "Invalid product ID"}), 400
-        price = price_result[0]
-        total = price * quantity
-
-        cursor.execute("INSERT INTO bills (customer_id, total_amount) VALUES (%s, %s)", (customer_id, total))
-        bill_id = cursor.lastrowid
-
-        cursor.execute("INSERT INTO bill_details (bill_id, product_id, quantity, subtotal) VALUES (%s, %s, %s, %s)",
-                       (bill_id, product_id, quantity, total))
-
-        connection.commit()
-        return jsonify({"message": "Bill generated successfully", "total_amount": float(total)}), 200
-
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+    invoice, items = get_invoice(invoice_id)
+    if not invoice:
+        return "Invoice not found", 404
+    return render_template('invoice.html', invoice=invoice, items=items)
 
 if __name__ == '__main__':
     app.run(debug=True)
