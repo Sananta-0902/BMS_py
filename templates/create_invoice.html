@@ -36,11 +36,10 @@
                 <label for="customer_phone">Customer Phone:</label>
                 <input type="text" id="customer_phone" name="customer_phone" class="form-control" required>
             </div>
-
+            <br><br>
             <div id="products">
                 <div class="form-row product-row mb-2">
                     <div class="col-md-8">
-                        <label>Product:</label>
                         <select name="product_id" class="form-control" required>
                             <option value="" disabled selected>Choose product</option>
                             {% for product in products %}
@@ -49,7 +48,6 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label>Quantity:</label>
                         <input type="number" name="quantity" class="form-control" min="1" placeholder="Qty" required>
                     </div>
                 </div>

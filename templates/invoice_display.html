@@ -7,6 +7,7 @@
     <title>Invoice #{{ invoice.invoice_id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body>
@@ -63,7 +64,10 @@
         </table>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('create_invoice') }}" class="btn btn-primary">Create Invoice</a>
+            <a href="{{ url_for('download_invoice_pdf', invoice_id=invoice.invoice_id) }}" class="btn btn-success">
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </a>
+            <a href="{{ url_for('create_invoice') }}" class="btn btn-primary ml-2">Create New Invoice</a>
         </div>
     </div>
 

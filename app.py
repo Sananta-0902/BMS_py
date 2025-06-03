@@ -1,9 +1,30 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 from db import *
-from flask import flash
+from flask import flash, make_response, g
+import pdfkit
+import os
+import tempfile
+import atexit
+import glob
+import time
 
 app = Flask(__name__)
 app.secret_key = "super-secret-key"  # Change this to a secure key in production
+
+# Create a temp directory for PDF files
+PDF_TEMP_DIR = os.path.join(tempfile.gettempdir(), 'invoice_pdfs')
+os.makedirs(PDF_TEMP_DIR, exist_ok=True)
+
+# Function to clean up temporary PDF files
+def cleanup_temp_files():
+    for file in glob.glob(os.path.join(PDF_TEMP_DIR, '*.pdf')):
+        try:
+            os.remove(file)
+        except Exception as e:
+            print(f"Error removing {file}: {e}")
+
+# Register cleanup function to run when Flask exits
+atexit.register(cleanup_temp_files)
 
 @app.route('/')
 def home():
@@ -156,6 +177,61 @@ def view_invoice(invoice_id):
     if not invoice:
         return "Invoice not found", 404
     return render_template('invoice.html', invoice=invoice, items=items)
+
+@app.route('/download_invoice_pdf/<int:invoice_id>')
+def download_invoice_pdf(invoice_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    # Get invoice data
+    invoice_data = get_invoice_details(invoice_id)
+    if not invoice_data:
+        return "Invoice not found", 404
+    
+    # Render the invoice template to HTML
+    rendered_html = render_template('invoice_pdf_template.html', invoice=invoice_data)
+    
+    # Create a temporary file in our dedicated temp directory
+    pdf_filename = os.path.join(PDF_TEMP_DIR, f"invoice_{invoice_id}_{int(time.time())}.pdf")
+    
+    # Convert HTML to PDF
+    options = {
+        'page-size': 'A4',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'no-outline': None
+    }
+    
+    # Generate the PDF
+    pdfkit.from_string(rendered_html, pdf_filename, options=options)
+    
+    # Store the filename in the session for cleanup
+    if 'pdf_files' not in session:
+        session['pdf_files'] = []
+    session['pdf_files'].append(pdf_filename)
+    
+    # Send the PDF file as a response
+    return send_file(
+        pdf_filename, 
+        as_attachment=True,
+        download_name=f"Invoice_{invoice_id}.pdf",
+        mimetype='application/pdf'
+    )
+
+# Add a teardown function to clean up PDF files after request
+@app.teardown_request
+def cleanup_after_request(exception=None):
+    if 'pdf_files' in session:
+        for filename in session['pdf_files']:
+            try:
+                if os.path.exists(filename):
+                    os.remove(filename)
+            except Exception as e:
+                print(f"Error removing {filename}: {e}")
+        session['pdf_files'] = []
 
 if __name__ == '__main__':
     app.run(debug=True)
