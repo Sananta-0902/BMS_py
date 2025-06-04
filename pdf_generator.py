@@ -29,14 +29,14 @@ def generate_invoice_pdf(invoice_data, pdf_filename):
         data.append([item['name'], f"{item['price']:.2f}", item['quantity'], f"{item['total_price']:.2f}"])
     data.append(["", "", "Total Amount", f"Rs.{invoice_data['total_amount']:.2f}"])
 
-    table = Table(data)
+    table = Table(data, colWidths=[150, 100, 100, 100])  # Adjust column widths
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ]))
     elements.append(table)
