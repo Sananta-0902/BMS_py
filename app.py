@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
 from db import *
 from flask import flash, make_response, g
-import pdfkit
+from pdf_generator import generate_invoice_pdf
 import os
 import tempfile
 import atexit
@@ -188,25 +188,11 @@ def download_invoice_pdf(invoice_id):
     if not invoice_data:
         return "Invoice not found", 404
     
-    # Render the invoice template to HTML
-    rendered_html = render_template('invoice_pdf_template.html', invoice=invoice_data)
-    
     # Create a temporary file in our dedicated temp directory
     pdf_filename = os.path.join(PDF_TEMP_DIR, f"invoice_{invoice_id}_{int(time.time())}.pdf")
     
-    # Convert HTML to PDF
-    options = {
-        'page-size': 'A4',
-        'margin-top': '0.75in',
-        'margin-right': '0.75in',
-        'margin-bottom': '0.75in',
-        'margin-left': '0.75in',
-        'encoding': "UTF-8",
-        'no-outline': None
-    }
-    
-    # Generate the PDF
-    pdfkit.from_string(rendered_html, pdf_filename, options=options)
+    # Generate the PDF using the external function
+    generate_invoice_pdf(invoice_data, pdf_filename)
     
     # Store the filename in the session for cleanup
     if 'pdf_files' not in session:
