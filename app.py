@@ -73,8 +73,23 @@ def manage_products():
 
         return redirect(url_for('manage_products'))
 
+    # Handle search and filter
+    search_query = request.args.get('search', '').strip()
+    filter_price = request.args.get('filter_price', '').strip()
+
     products = get_all_products()
-    return render_template('manage_products.html', products=products)
+
+    if search_query:
+        products = [product for product in products if search_query.lower() in product['name'].lower()]
+
+    if filter_price:
+        try:
+            filter_price = float(filter_price)
+            products = [product for product in products if product['price'] <= filter_price]
+        except ValueError:
+            pass  # Ignore invalid filter_price values
+
+    return render_template('manage_products.html', products=products, search_query=search_query, filter_price=filter_price)
 
 @app.route('/manage_staff', methods=['GET', 'POST'])
 def manage_staff():
@@ -165,9 +180,16 @@ def create_invoice():
         # Render invoice display page
         return render_template('invoice_display.html', invoice=invoice_data)
 
+    # Handle search query
+    search_query = request.args.get('search', '').strip()
+    invoices = get_all_invoices()
+
+    if search_query:
+        invoices = [invoice for invoice in invoices if search_query.lower() in invoice['customer_name'].lower()]
+
     # GET request: show create invoice form
     products = get_all_products()
-    return render_template('create_invoice.html', products=products)
+    return render_template('create_invoice.html', products=products, invoices=invoices, search_query=search_query)
 
 @app.route('/invoice/<int:invoice_id>')
 def view_invoice(invoice_id):
@@ -178,6 +200,29 @@ def view_invoice(invoice_id):
     if not invoice:
         return "Invoice not found", 404
     return render_template('invoice.html', invoice=invoice, items=items)
+
+@app.route('/search_invoices', methods=['GET'])
+def search_invoices():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role != 'staff':
+        return "Unauthorized", 403
+
+    search_query = request.args.get('search', '').strip()
+    search_type = request.args.get('type', '').strip()
+
+    invoices = get_all_invoices()
+
+    if search_query and search_type == 'id':
+        invoices = [invoice for invoice in invoices if str(invoice['invoice_id']) == search_query]
+    elif search_query and search_type == 'name':
+        invoices = [invoice for invoice in invoices if search_query.lower() in invoice['customer_name'].lower()]
+    elif search_query and search_type == 'date':
+        invoices = [invoice for invoice in invoices if search_query in invoice['date']]
+
+    return render_template('search_invoices.html', invoices=invoices, search_query=search_query, search_type=search_type)
 
 @app.route('/download_invoice_pdf/<int:invoice_id>')
 def download_invoice_pdf(invoice_id):

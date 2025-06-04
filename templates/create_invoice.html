@@ -17,15 +17,22 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav">
+<ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('search_invoices') }}">Search Invoices</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                 </li>
             </ul>
         </div>
-    </nav>
+</nav>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
+            <label class="form-check-label" for="themeToggle">Dark Mode</label>
+        </div>
 
-    <div class="container mt-4">
+<div class="container mt-4 card">
         <h2 class="text-center">Create Invoice</h2>
         <form method="POST">
             <div class="form-row">
@@ -86,6 +93,13 @@
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? '' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+    }
+</script>
 </body>
 
 </html>

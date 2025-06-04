@@ -153,6 +153,19 @@ def delete_product(product_id):
 
 # ===================== INVOICE FUNCTIONS =====================
 
+def get_all_invoices():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT invoices.id AS invoice_id, invoices.date,
+               customers.name AS customer_name, customers.phone AS customer_phone
+        FROM invoices
+        JOIN customers ON invoices.customer_id = customers.id
+    """)
+    invoices = cursor.fetchall()
+    db.close()
+    return invoices
+
 def insert_invoice(customer_id, product_ids=None, quantities=None):
     db = get_db_connection()
     cursor = db.cursor()
