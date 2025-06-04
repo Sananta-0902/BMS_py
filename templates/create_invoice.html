@@ -28,18 +28,20 @@
     <div class="container mt-4">
         <h2 class="text-center">Create Invoice</h2>
         <form method="POST">
-            <div class="form-group">
-                <label for="customer_name">Customer Name:</label>
-                <input type="text" id="customer_name" name="customer_name" class="form-control" required>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="customer_name">Customer Name:</label>
+                    <input type="text" id="customer_name" name="customer_name" class="form-control" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="customer_phone">Customer Phone:</label>
+                    <input type="text" id="customer_phone" name="customer_phone" class="form-control" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="customer_phone">Customer Phone:</label>
-                <input type="text" id="customer_phone" name="customer_phone" class="form-control" required>
-            </div>
-            <br><br>
+<br><br>
             <div id="products">
                 <div class="form-row product-row mb-2">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <select name="product_id" class="form-control" required>
                             <option value="" disabled selected>Choose product</option>
                             {% for product in products %}
@@ -47,8 +49,11 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="number" name="quantity" class="form-control" min="1" placeholder="Qty" required>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
                     </div>
                 </div>
             </div>
@@ -58,17 +63,27 @@
         </form>
     </div>
 
-    <!-- JavaScript for Add More functionality -->
+    <!-- JavaScript for Add/Remove Row -->
     <script>
         function addRow() {
-            let row = document.querySelector('.product-row').cloneNode(true);
-            row.querySelector('input[name="quantity"]').value = '';
-            row.querySelector('select[name="product_id"]').selectedIndex = 0;
-            document.getElementById('products').appendChild(row);
+            let originalRow = document.querySelector('.product-row');
+            let newRow = originalRow.cloneNode(true);
+
+            newRow.querySelector('input[name="quantity"]').value = '';
+            newRow.querySelector('select[name="product_id"]').selectedIndex = 0;
+
+            document.getElementById('products').appendChild(newRow);
+        }
+
+        function removeRow(button) {
+            let rows = document.querySelectorAll('.product-row');
+            if (rows.length > 1) {
+                button.closest('.product-row').remove();
+            }
         }
     </script>
 
-    <!-- Required JS for Bootstrap 4 navbar to work -->
+    <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
