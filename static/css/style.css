@@ -1,4 +1,12 @@
 /* Bootstrap CSS CDN */
+.navbar-light {
+    background-color: var(--background-color) !important;
+
+}
+.navbar .form-check {
+    margin-left: auto;
+    margin-right: 0;
+}
 @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
 
 /* Root Theme Variables - Light by default */
@@ -50,7 +58,7 @@ input, select, button {
 
 /* Optional: Dark navbar override */
 [data-theme="dark"] .navbar {
-    background-color: #1e1e1e !important;
+    background-color: #121212 !important;
 }
 
 [data-theme="dark"] .navbar-light .navbar-brand,
