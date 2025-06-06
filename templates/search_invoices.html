@@ -2,22 +2,22 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search Invoices</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Invoice System</a>
-<button class="navbar-toggler ms-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
-    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler ms-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-<ul class="navbar-nav">
+            <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('create_invoice') }}">Create Invoice</a>
                 </li>
@@ -27,33 +27,37 @@
             </ul>
         </div>
         <label class="form-check-label" for="themeToggle">🔆</label>
-        <div class="form-check form-switch" style="margin-left: auto;">
-            <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
-            <label class="form-check-label" for="themeToggle">⏾</label>
+        <div class="custom-control custom-switch" style="margin-left: 10px;">
+            <input type="checkbox" class="custom-control-input" id="themeToggle" onchange="toggleTheme()">
+            <label class="custom-control-label" for="themeToggle">⏾</label>
         </div>
-</nav>
+    </nav>
 
-
-<div class="container mt-4 card">
-        <h2 class="text-center">Search Invoices</h2>
-        <form method="GET" class="mb-3">
-            <div class="form-group mb-2">
-                <label for="search">Search Query:</label>
-                <input type="text" id="search" name="search" class="form-control" value="{{ search_query }}">
+    <div class="container mt-4 card p-4">
+        <h2 class="text-center mb-4">Search Invoices</h2>
+        <form method="GET" class="mb-4" >
+            <div class="d-flex flex-wrap gap-3 align-items-end" style="gap: 10px;">
+                <div>
+                    <label for="search">Search Query:</label>
+                    <input type="text" id="search" name="search" class="form-control" style="min-width: 200px;"
+                        value="{{ search_query }}">
+                </div>
+                <div>
+                    <label for="type">Search By:</label>
+                    <select id="type" name="type" class="form-control" style="min-width: 200px;">
+                        <option value="id" {% if search_type=='id' %}selected{% endif %}>Invoice ID</option>
+                        <option value="name" {% if search_type=='name' %}selected{% endif %}>Customer Name</option>
+                        <option value="date" {% if search_type=='date' %}selected{% endif %}>Date</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary mt-4">Search</button>
+                </div>
             </div>
-            <div class="form-group mb-2">
-                <label for="type">Search By:</label>
-                <select id="type" name="type" class="form-control">
-                    <option value="id" {% if search_type == 'id' %}selected{% endif %}>Invoice ID</option>
-                    <option value="name" {% if search_type == 'name' %}selected{% endif %}>Customer Name</option>
-                    <option value="date" {% if search_type == 'date' %}selected{% endif %}>Date</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Search</button>
         </form>
 
         <h3>Search Results</h3>
-        <table class="table table-bordered">
+        <table class="table table-bordered mt-3">
             <thead>
                 <tr>
                     <th>Invoice ID</th>
@@ -63,7 +67,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-<tbody>
+            <tbody>
                 {% for invoice in invoices %}
                 <tr>
                     <td>{{ invoice.invoice_id }}</td>
@@ -71,7 +75,13 @@
                     <td>{{ invoice.customer_name }}</td>
                     <td>{{ invoice.customer_phone }}</td>
                     <td>
-                        <a href="{{ url_for('download_invoice_pdf', invoice_id=invoice.invoice_id) }}" class="btn btn-secondary btn-sm">Download</a>
+                        <a href="{{ url_for('download_invoice_pdf', invoice_id=invoice.invoice_id) }}"
+                            class="btn btn-secondary btn-sm">Download</a>
+                        <a href="{{ url_for('view_invoice', invoice_id=invoice.invoice_id) }}"
+                            class="btn btn-info btn-sm">View</a>
+<form action="{{ url_for('delete_invoice', invoice_id=invoice.invoice_id) }}" method="POST" style="display: inline;">
+    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</button>
+</form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -82,22 +92,21 @@
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.getElementById('themeToggle').checked = newTheme === 'dark';
-}
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('themeToggle').checked = newTheme === 'dark';
+        }
 
-    // Apply saved theme on page load
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.getElementById('themeToggle').checked = savedTheme === 'dark';
-    }
-</script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        }
+    </script>
 </body>
 
 </html>

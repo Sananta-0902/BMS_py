@@ -43,7 +43,7 @@ body {
     color: var(--card-text-color);
     transition: background-color 0.3s, color 0.3s;
 }
-[data-theme="dark"] .card {
+[data-theme="dark"] .card, [data-theme="dark"] .table {
     background-color: var(--card-background-color);
     color: var(--card-text-color);
 }

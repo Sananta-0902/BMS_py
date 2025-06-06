@@ -153,7 +153,7 @@ def create_invoice():
         return redirect(url_for('login'))
 
     user_role = get_user_role(session['user'])
-    if user_role != 'staff':
+    if user_role not in ['staff', 'admin']:
         return "Unauthorized", 403
 
     if request.method == 'POST':
@@ -201,13 +201,25 @@ def view_invoice(invoice_id):
         return "Invoice not found", 404
     return render_template('invoice.html', invoice=invoice, items=items)
 
+@app.route('/delete_invoice/<int:invoice_id>', methods=['GET', 'POST'])
+def delete_invoice(invoice_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    user_role = get_user_role(session['user'])
+    if user_role not in ['staff', 'admin']:
+        return "Unauthorized", 403
+
+    delete_invoice_by_id(invoice_id)
+    return redirect(url_for('search_invoices'))
+
 @app.route('/search_invoices', methods=['GET'])
 def search_invoices():
     if 'user' not in session:
         return redirect(url_for('login'))
 
     user_role = get_user_role(session['user'])
-    if user_role != 'staff':
+    if user_role not in ['staff', 'admin']:
         return "Unauthorized", 403
 
     search_query = request.args.get('search', '').strip()

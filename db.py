@@ -153,6 +153,14 @@ def delete_product(product_id):
 
 # ===================== INVOICE FUNCTIONS =====================
 
+def delete_invoice_by_id(invoice_id):
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM invoice_items WHERE invoice_id = %s", (invoice_id,))
+    cursor.execute("DELETE FROM invoices WHERE id = %s", (invoice_id,))
+    db.commit()
+    db.close()
+
 def get_all_invoices():
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
@@ -212,6 +220,7 @@ def get_invoice(invoice_id):
     items = cursor.fetchall()
 
     db.close()
+    invoice['total_amount'] = sum(item['price'] * item['quantity'] for item in items)
     return invoice, items
 
 def get_invoice_details(invoice_id):
