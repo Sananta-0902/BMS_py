@@ -54,3 +54,26 @@ The database schema is defined in the `billing_system.sql` file. It includes tab
 - **Database**: MySQL
 - **Authentication**: Werkzeug for password hashing
 
+### Project Structure
+```
+.
+├── admin_setup.py
+├── app.py
+├── db.py
+├── pdf_generator.py
+├── README.md
+├── requirements.txt
+├── Schema.sql
+├── static/
+│   └── css/
+│       └── style.css
+├── templates/
+│   ├── admin.html          # Admin dashboard for managing system settings
+│   ├── create_invoice.html # Interface for creating new invoices
+│   ├── invoice_display.html # Page for displaying detailed invoices
+│   ├── invoice.html        # Template for individual invoice layout
+│   ├── login.html          # Login page for authentication
+│   ├── manage_products.html # Interface for managing product details
+│   ├── manage_staff.html   # Interface for managing staff information
+│   └── search_invoices.html # Page for searching and filtering invoices
+```
