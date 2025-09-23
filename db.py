@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # DB connection
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
+        host="host.docker.internal",
         user="billing_user",
         password="password",
         database="billing_db"
